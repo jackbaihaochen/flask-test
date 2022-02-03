@@ -38,7 +38,7 @@ class LineAuthV2():
             # if the specified auth type is User Account Auth (OAuth)
             if(self.auth_type == 'OAuth'):
                 print('Access Token retrieved by OAuth.')
-                return self.get_access_token_by_oauth()
+                return self.get_access_token_by_oauth(authorization_code)
             # if the specified auth type is Service Account Auth (JWT)
             else:
                 print('Access Token retrieved by JWT.')
