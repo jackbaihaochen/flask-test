@@ -19,7 +19,7 @@ class LineAuthV2():
         self.scope = scope
         self.auth_type = auth_type
         self.redirect_url = redirect_url
-        self.user_auth_url = 'https://auth.worksmobile.com/oauth2/v2.0/authorize?client_id={clinet_id}&redirect_uri={redirect_url}&scope={scope}&response_type=code&state=aBcDeF'.format(client_id = self.client_id, redirect_url = self.redirect_url, scope = self.scope)
+        self.user_auth_url = 'https://auth.worksmobile.com/oauth2/v2.0/authorize?client_id={client_id}&redirect_uri={redirect_url}&scope={scope}&response_type=code&state=aBcDeF'.format(client_id = self.client_id, redirect_url = self.redirect_url, scope = self.scope)
 
 
     # Get Access Token: Retrieve from DB, otherwise from Post request
