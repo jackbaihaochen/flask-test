@@ -14,7 +14,7 @@ def line_works_test_page():
     client_secret = 'dFVoTijl9l'
     client_id = 'AVd_gv8Ruji_80dWUNRt'
     service_account = '6xr6v.serviceaccount@jackbai'
-    redirect_url = 'https://ec2-3-82-201-32.compute-1.amazonaws.com:5000/line_works/redirect_url'
+    redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
     user_auth_url = lineworks.LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
     return render_template('test_page.html', user_auth_url = user_auth_url)
 
