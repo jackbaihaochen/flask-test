@@ -43,9 +43,9 @@ def line_works_send_to_one_user():
     msg = request.form['msg']
     if(access_token):
         result = LineBot(access_token, new_bot_id).send_message_to_one(user_id, msg)
-        return result
+        return 'Succeeded' if result else 'Failed'
     else:
-        return False
+        return 'Failed'
 
 # Register a bot
 @app.route('/line_works/register_one_bot', methods = ['POST'])
@@ -56,7 +56,7 @@ def line_works_register_one_bot():
         result = LineBot(access_token, new_bot_id).register_bot(bot_name)
         return result
     else:
-        return False
+        return 'Failed'
 
 
 

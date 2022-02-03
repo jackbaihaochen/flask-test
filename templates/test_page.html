@@ -39,11 +39,7 @@
                     msg: $("#msg").val()
                 }
                 $.post(url, data, function(response){
-                    if(response){
-                        $("#response").html(`<h1>Succeeded</h1>`);
-                    }else{
-                        $("#response").html(`<h1>Failed</h1>`);
-                    }
+                    $("#response").html(`<h1>${response}</h1>`);
                 })
             });
 
@@ -54,11 +50,7 @@
                     bot_name: $("#bot_name").val()
                 }
                 $.post(url, data, function(response){
-                    if(response){
-                        $("#response").html(`<p>${response}</p>`);
-                    }else{
-                        $("#response").html(`<h1>Failed</h1>`);
-                    }
+                    $("#response").html(`<p>${response}</p>`);
                 })
             });
         });
