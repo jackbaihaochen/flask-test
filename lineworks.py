@@ -74,13 +74,32 @@ class LineAuthV2():
             'scope': self.scope,
         }
         response = requests.post(url=url, data=data, headers=headers)
-        access_token = self.update_access_token_info_to_db(response)
+        response = response.json()
+        access_token = response.get('access_token')
+
+        self.update_access_token_info_to_db(response)
         return access_token
 
     
     # # Get Access Token by User Account Auth (OAuth) request.
-    # def get_access_token_by_oauth(self):
-    #     response = 
+    def get_access_token_by_oauth(self, authorization_code):
+        url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
+        headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        data = {
+            'code': authorization_code,
+            'grant_type': 'authorization_code',
+            'client_id': self.client_id,
+            'client_secret': self.client_secret,
+        }
+        response = requests.post(url=url, data=data, headers=headers)
+        response = response.json()
+        access_token = response.get('access_token')
+
+        self.update_access_token_info_to_db(response)
+        return access_token
+        
 
 
     # Get Access Token from DB.

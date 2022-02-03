@@ -22,5 +22,11 @@
     {% else %}
     <p>State Code is not available</p>
     {% endif %}
+
+    {% if access_token %}
+    <p>Access Token is : {{ access_token }}</p>
+    {% else %}
+    <p>Access Token is not available</p>
+    {% endif %}
 </body>
 </html>

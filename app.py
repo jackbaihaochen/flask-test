@@ -3,19 +3,20 @@ from flask import render_template
 from flask import url_for
 from flask import request
 from mongo import mongo_connection
-import lineworks
+from lineworks import LineAuthV2
 
 app = Flask(__name__)
 
 # For Line Works Bot
+client_secret = 'dFVoTijl9l'
+client_id = 'AVd_gv8Ruji_80dWUNRt'
+service_account = '6xr6v.serviceaccount@jackbai'
+redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
+
 # Auth Button Page
 @app.route('/line_works/test_page')
 def line_works_test_page():
-    client_secret = 'dFVoTijl9l'
-    client_id = 'AVd_gv8Ruji_80dWUNRt'
-    service_account = '6xr6v.serviceaccount@jackbai'
-    redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
-    user_auth_url = lineworks.LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
+    user_auth_url = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
     return render_template('test_page.html', user_auth_url = user_auth_url)
 
 
@@ -28,7 +29,8 @@ def line_works_redirect_url():
         msg = 'State Matched'
     else:
         msg = "Stata didn't Match"
-    return render_template('redirect_url.html', msg = msg, state = state, authorization_code = authorization_code)
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    return render_template('redirect_url.html', msg = msg, state = state, authorization_code = authorization_code, access_token = access_token)
 
 # For basic test
 @app.route('/', methods = ['GET'])
