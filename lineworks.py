@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 import requests
 import json
-from mongo import mongo_connection
+from mongo import mongo_connection, mongo_insert_document
 
 
 # class for Line Auth V2 referring API 2.0
@@ -205,9 +205,10 @@ class LineAuthV2():
         if(refresh_token):
             newvalues['refresh_token'] = refresh_token
             newvalues['refresh_token_expiration_time'] = datetime.fromtimestamp(int(datetime.now().timestamp() + int(60*60*24*90)))
-        update_result = collection.find_one_and_update(myquery, newvalues)
+        update_result = collection.find_one_and_update(myquery, {'$set': newvalues})
         # If the document itself doesn't exist, update result will be None. Then create the document.
-        collection.insert_one(newvalues)
+        if(not update_result):
+            collection.insert_one(newvalues)
 
         # Using Relational DB
         # # update/insert data into DB
@@ -306,21 +307,23 @@ class LineBot():
 
 
     # register the bot
-    def register_bot(self):
-        url = 'https://apis.worksmobile.com/r/' + 'jp2nSdmaqsgFW' + '/message/v1/bot'
+    def register_bot(self, bot_name, administrators = ['bai.jack@jackbai']):
+        url = 'https://www.worksapis.com/v1.0/bots'
         print('Register url is: ' + url)
         headers = {
-            "consumerKey": "piM8dniNdZRC0EZhpdRz"
+            'Authorization': 'Bearer {token}'.format(self.access_token),
+            'Content-Type': 'application/json',
         }
         data = {
-            "name": "echo bot",
+            "botName": "echo bot",
             "photoUrl": "https://developers.worksmobile.com/favicon.png",
             "description": "WorksMobile's A.I. conversation enabled bot",
-            "managers": ["bai.jack@jackbai"],
-            'useCallback': True,
-            'callbackUrl': 'https://djangotestbai.herokuapp.com/line/callback',
-            'callbackEvents': ['text'],
+            "administrators": administrators,
+            'enableCallback': True,
+            'callbackUrl': 'https://flask-test-bai.herokuapp.com/line_works/callback_url',
+            'callbackEvents': ['text', 'file', 'image', 'sticker', 'location'],
         }
         response = requests.post(url=url, data=data).json()
         print('Bot Register signal sent. Response: \n' + json.dumps(response))
+        mongo_insert_document(response)
         return json.dumps(response)

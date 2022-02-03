@@ -9,3 +9,9 @@ def mongo_connection():
     CONNECTION_URL = "mongodb://{username}:{password}@{host}:{port}/?authSource={auth}".format(username = USERNAME, password = PASSWORD, host = HOST, port = PORT, auth = AUTH)
     client = MongoClient(CONNECTION_URL)
     return client
+
+def mongo_insert_document(data):
+    client = mongo_connection()
+    db = client['MONGO_DB']
+    collection = db['MONGO_COLLECTION']
+    collection.insert_one(data)
