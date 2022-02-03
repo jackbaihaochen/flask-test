@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect_URL</title>
+</head>
+<body>
+    {% if msg %}
+    <h1>{{ msg }}</h1>
+    {% endif %}
+
+    {% if authorization_code %}
+    <p>Auth Code is : {{ authorization_code }}</p>
+    {% else %}
+    <p>Auth Code is not available</p>
+    {% endif %}
+
+    {% if state %}
+    <p>State Code is : {{ state }}</p>
+    {% else %}
+    <p>State Code is not available</p>
+    {% endif %}
+</body>
+</html>
