@@ -1,0 +1,23 @@
+<!doctype html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Hello from Flask</title>
+</head>
+<body>
+    {% if name and age %}
+    <h1>Hello {{ name }}! Your are {{ age }} years old.</h1>
+    {% elif name %}
+    <h1>Hello {{ name }}!</h1>
+    {% else %}
+    <h1>Hello, World!</h1>
+    {% endif %}
+    <form action="{{ search_url }}" method="get">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name">
+        <input type="submit" value="search">
+    </form>
+    <a href="{{ show_insert_url }}">Insert Click Here</a>
+    {% if msg %}
+    <h1>{{ msg }}</h1>
+    {% endif %}
+</body>
