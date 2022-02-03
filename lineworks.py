@@ -307,23 +307,31 @@ class LineBot():
 
 
     # register the bot
-    def register_bot(self, bot_name, administrators = ['bai.jack@jackbai']):
+    def register_bot(self, bot_name, photo_url = 'https://developers.worksmobile.com/favicon.png', description = "WorksMobile's A.I. conversation enabled bot", administrators = ['bai.jack@jackbai'], enable_callback = True, callback_url = 'https://flask-test-bai.herokuapp.com/line_works/callback_url', callback_events = ['text', 'file', 'image', 'sticker', 'location']):
         url = 'https://www.worksapis.com/v1.0/bots'
         print('Register url is: ' + url)
         headers = {
             'Authorization': 'Bearer {token}'.format(self.access_token),
             'Content-Type': 'application/json',
         }
-        data = {
-            "botName": "echo bot",
-            "photoUrl": "https://developers.worksmobile.com/favicon.png",
-            "description": "WorksMobile's A.I. conversation enabled bot",
-            "administrators": administrators,
-            'enableCallback': True,
-            'callbackUrl': 'https://flask-test-bai.herokuapp.com/line_works/callback_url',
-            'callbackEvents': ['text', 'file', 'image', 'sticker', 'location'],
-        }
-        response = requests.post(url=url, data=data).json()
+        if(enable_callback):
+            data = {
+                "botName": bot_name,
+                "photoUrl": photo_url,
+                "description": description,
+                "administrators": administrators,
+                'enableCallback': enable_callback,
+                'callbackUrl': callback_url,
+                'callbackEvents': callback_events,
+            }
+        else:
+            data = {
+                "botName": bot_name,
+                "photoUrl": photo_url,
+                "description": description,
+                "administrators": administrators,
+            }
+        response = requests.post(url=url, data=data, headers = headers).json()
         print('Bot Register signal sent. Response: \n' + json.dumps(response))
         mongo_insert_document(response)
         return json.dumps(response)

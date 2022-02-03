@@ -10,17 +10,29 @@
 <body>
     <a href="{{ user_auth_url }}">Click to Auth</a>
 
-    <label for="user_id">User ID</label>
-    <input type="text" name="user_id" id="user_id">
-    <label for="msg">Message</label>
-    <input type="text" name="msg" id="msg">
-    <button type="submit" id="submit">Submit</button>
+    <fieldset>
+        <legend>Send Message to One User</legend>
+        <label for="user_id">User ID</label>
+        <input type="text" name="user_id" id="user_id">
+        <label for="msg">Message</label>
+        <input type="text" name="msg" id="msg">
+        <button type="submit" id="submit_send_msg">Submit</button>
+    </fieldset>
+
+    <fieldset>
+        <legend>Register One Bot</legend>
+        <label for="bot_name">Bot Name</label>
+        <input type="text" name="bot_name" id="bot_name">
+        <button type="submit" id="submit_register_bot">Submit</button>
+    </fieldset>
+
 
     <div id="response"></div>
     
     <script>
         $(function(){
-            $("#submit").click(function(){
+            // send msg
+            $("#submit_send_msg").click(function(){
                 url = "{{ send_to_one_user_url }}"
                 data = {
                     user_id: $("#user_id").attr("value"),
@@ -29,6 +41,21 @@
                 $.post(url, data, function(response){
                     if(response){
                         $("#response").html(`<h1>Succeeded</h1>`);
+                    }else{
+                        $("#response").html(`<h1>Failed</h1>`);
+                    }
+                })
+            });
+
+            // register bot
+            $("#submit_register_bot").click(function(){
+                url = "{{ register_one_bot_url }}"
+                data = {
+                    bot_name: $("#bot_name").attr("value"),
+                }
+                $.post(url, data, function(response){
+                    if(response){
+                        $("#response").html(`<p>${response}</p>`);
                     }else{
                         $("#response").html(`<h1>Failed</h1>`);
                     }

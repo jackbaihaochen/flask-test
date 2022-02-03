@@ -20,7 +20,7 @@ old_bot_id = '1416866'
 @app.route('/line_works/test_page')
 def line_works_test_page():
     user_auth_url = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
-    return render_template('test_page.html', user_auth_url = user_auth_url, send_to_one_user_url = url_for(line_works_send_to_one_user))
+    return render_template('test_page.html', user_auth_url = user_auth_url, send_to_one_user_url = url_for('line_works_send_to_one_user'), register_one_bot_url = url_for('line_works_register_one_bot'))
 
 
 # Redirect_URL for User Account Auth (OAuth)
@@ -43,6 +43,17 @@ def line_works_send_to_one_user():
     msg = request.form['msg']
     if(access_token):
         result = LineBot(access_token, new_bot_id).send_message_to_one(user_id, msg)
+        return result
+    else:
+        return False
+
+# Register a bot
+@app.route('/line_works/register_one_bot', methods = ['POST'])
+def line_works_register_one_bot():
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    bot_name = request.form['bot_name']
+    if(access_token):
+        result = LineBot(access_token, new_bot_id).register_bot(bot_name)
         return result
     else:
         return False
