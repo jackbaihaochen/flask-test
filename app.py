@@ -81,3 +81,6 @@ def insert_name():
     }
     document = collection.insert_one(data)
     return redirect(url_for('show_search', name = name, age = age))
+
+if __name__ == '__main__':
+    app.run()
