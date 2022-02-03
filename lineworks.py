@@ -78,9 +78,9 @@ class LineAuthV2():
         return access_token
 
     
-    # Get Access Token by User Account Auth (OAuth) request.
-    def get_access_token_by_oauth(self):
-        response = 
+    # # Get Access Token by User Account Auth (OAuth) request.
+    # def get_access_token_by_oauth(self):
+    #     response = 
 
 
     # Get Access Token from DB.
