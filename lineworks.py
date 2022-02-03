@@ -285,7 +285,9 @@ class LineBot():
             },
         }
         data = json.dumps(data)
-        response = requests.post(url=url, data=data, headers=headers).status_code
+        response = requests.post(url=url, data=data, headers=headers)
+        print('Message sent. Response: ' + json.dumps(response.json()))
+        response = response.status_code
         print('Message sent. Response: \n' + 'Succeeded' if response == 201 else 'Failed')
         return response == 201
 
