@@ -4,6 +4,7 @@ from flask import url_for
 from flask import request
 from mongo import mongo_connection
 from lineworks import LineAuthV2
+from lineworks import LineBot
 
 app = Flask(__name__)
 
@@ -12,12 +13,14 @@ client_secret = 'dFVoTijl9l'
 client_id = 'AVd_gv8Ruji_80dWUNRt'
 service_account = '6xr6v.serviceaccount@jackbai'
 redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
+new_bot_id = '1416858'
+old_bot_id = '1416866'
 
 # Auth Button Page
 @app.route('/line_works/test_page')
 def line_works_test_page():
     user_auth_url = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
-    return render_template('test_page.html', user_auth_url = user_auth_url)
+    return render_template('test_page.html', user_auth_url = user_auth_url, send_to_one_user_url = url_for(line_works_send_to_one_user))
 
 
 # Redirect_URL for User Account Auth (OAuth)
@@ -31,6 +34,27 @@ def line_works_redirect_url():
         msg = "Stata didn't Match"
     access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token(authorization_code = authorization_code)
     return render_template('redirect_url.html', msg = msg, state = state, authorization_code = authorization_code, access_token = access_token)
+
+# Send Message to One certain user
+@app.route('/line_works/send_to_one_user', methods = ['POST'])
+def line_works_send_to_one_user():
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    user_id = request.form['user_id']
+    msg = request.form['msg']
+    if(access_token):
+        result = LineBot(access_token, new_bot_id).send_message_to_one(user_id, msg)
+        return result
+    else:
+        return False
+
+
+
+
+
+
+
+
+
 
 # For basic test
 @app.route('/', methods = ['GET'])

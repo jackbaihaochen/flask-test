@@ -1,1 +1,40 @@
-<a href="{{ user_auth_url }}">Click to Auth</a>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <title>Test Page</title>
+</head>
+<body>
+    <a href="{{ user_auth_url }}">Click to Auth</a>
+
+    <label for="user_id">User ID</label>
+    <input type="text" name="user_id" id="user_id">
+    <label for="msg">Message</label>
+    <input type="text" name="msg" id="msg">
+    <button type="submit" id="submit">Submit</button>
+
+    <div id="response"></div>
+    
+    <script>
+        $(function(){
+            $("#submit").click(function(){
+                url = "{{ send_to_one_user_url }}"
+                data = {
+                    user_id: $("#user_id").attr("value"),
+                    msg: $("#msg").attr("value"),
+                }
+                $.post(url, data, function(response){
+                    if(response){
+                        $("#response").html(`<h1>Succeeded</h1>`);
+                    }else{
+                        $("#response").html(`<h1>Failed</h1>`);
+                    }
+                })
+            });
+        });
+    </script>
+</body>
+</html>

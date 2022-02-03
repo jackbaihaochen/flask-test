@@ -83,22 +83,25 @@ class LineAuthV2():
     
     # # Get Access Token by User Account Auth (OAuth) request.
     def get_access_token_by_oauth(self, authorization_code):
-        url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
-        headers = {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-        data = {
-            'code': authorization_code,
-            'grant_type': 'authorization_code',
-            'client_id': self.client_id,
-            'client_secret': self.client_secret,
-        }
-        response = requests.post(url=url, data=data, headers=headers)
-        response = response.json()
-        access_token = response.get('access_token')
+        if(authorization_code):
+            url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
+            headers = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+            data = {
+                'code': authorization_code,
+                'grant_type': 'authorization_code',
+                'client_id': self.client_id,
+                'client_secret': self.client_secret,
+            }
+            response = requests.post(url=url, data=data, headers=headers)
+            response = response.json()
+            access_token = response.get('access_token')
 
-        self.update_access_token_info_to_db(response)
-        return access_token
+            self.update_access_token_info_to_db(response)
+            return access_token
+        else:
+            return False
         
 
 
@@ -186,7 +189,6 @@ class LineAuthV2():
     # Insert Access Token Info into DB
     def update_access_token_info_to_db(self, response):
         # Get data from response
-        response = response.json()
         access_token = response.get('access_token')
         refresh_token = response.get('refresh_token')
         expires_in = response.get('expires_in')
@@ -302,8 +304,7 @@ class LineBot():
         print('Register signal sent. Response: \n' + json.dumps(response))
         return response
 
-# class for old line bot
-class OldLineBot():
+
     # register the bot
     def register_bot(self):
         url = 'https://apis.worksmobile.com/r/' + 'jp2nSdmaqsgFW' + '/message/v1/bot'
