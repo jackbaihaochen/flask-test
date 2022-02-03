@@ -121,12 +121,10 @@ class LineAuthV2():
             db_access_token_expiration_time = document['access_token_expiration_time']
             db_refresh_token_expiration_time = document['refresh_token_expiration_time']
             # check if access token is expired
-            db_access_token_expiration_time = datetime.strptime(db_access_token_expiration_time, '%Y-%m-%d %H:%M:%S')
             if(db_access_token_expiration_time <= datetime.now()):
                 print("Access_token in DB expired")
                 db_access_token = False
                 # only if access token is expired, would we check whether refresh token is expired. If access token is not expired, then we can just use access token.
-                db_refresh_token_expiration_time = datetime.strptime(db_refresh_token_expiration_time, '%Y-%m-%d %H:%M:%S')
                 if(db_refresh_token_expiration_time <= datetime.now()):
                     print("Refresh_token in DB expired")
                     db_refresh_token = False

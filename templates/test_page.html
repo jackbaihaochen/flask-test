@@ -36,7 +36,7 @@
                 url = "{{ send_to_one_user_url }}"
                 data = {
                     user_id: $("#user_id").attr("value"),
-                    msg: $("#msg").attr("value"),
+                    msg: $("#msg").attr("value")
                 }
                 $.post(url, data, function(response){
                     if(response){
@@ -51,7 +51,7 @@
             $("#submit_register_bot").click(function(){
                 url = "{{ register_one_bot_url }}"
                 data = {
-                    bot_name: $("#bot_name").attr("value"),
+                    bot_name: $("#bot_name").attr("value")
                 }
                 $.post(url, data, function(response){
                     if(response){
