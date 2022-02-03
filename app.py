@@ -29,7 +29,7 @@ def line_works_redirect_url():
         msg = 'State Matched'
     else:
         msg = "Stata didn't Match"
-    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token(authorization_code = authorization_code)
     return render_template('redirect_url.html', msg = msg, state = state, authorization_code = authorization_code, access_token = access_token)
 
 # For basic test

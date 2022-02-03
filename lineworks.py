@@ -23,7 +23,7 @@ class LineAuthV2():
 
 
     # Get Access Token: Retrieve from DB, otherwise from Post request
-    def get_access_token(self):
+    def get_access_token(self, authorization_code = None):
         # if access_token exists and valid in DB
         result = self.get_access_token_from_db()
         if(result['access_token']):
