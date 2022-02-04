@@ -330,6 +330,7 @@ class LineBot():
                 "description": description,
                 "administrators": administrators,
             }
+        data = json.dumps(data)
         response = requests.post(url=url, data=data, headers = headers).json()
         print('Bot Register signal sent. Response: ' + json.dumps(response))
         mongo_insert_document(response)
