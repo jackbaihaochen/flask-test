@@ -262,7 +262,7 @@ class LineBot():
         if(count):
             params['count'] = count
         response = requests.get(url=url, params=params, headers=headers).json()
-        print('Domain Member List Response: \n' + json.dumps(response))
+        print('Domain Member List Response: ' + json.dumps(response))
         members = response.get('members')
         next_cursor = None
         response_metadata = response.get('responseMetaData')
@@ -286,12 +286,11 @@ class LineBot():
         }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers=headers)
-        print('Message sent. Response: ' + response.text)
         response = response.status_code
-        print('Message sent. Response: \n' + 'Succeeded' if response == 201 else 'Failed')
+        print('Message sent. Response: ' + 'Succeeded' if response == 201 else 'Failed')
         return response == 201
 
-    # Register one user to the bot
+    # Register the bot to one user
     def register_one_user(self, domain_id, user_id):
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/domains/' + str(domain_id) + '/members'
         print('Register url is: ' + url)
@@ -302,7 +301,7 @@ class LineBot():
             'userId': user_id
         }
         response = requests.post(url=url, data=data, headers=headers).json()
-        print('Register signal sent. Response: \n' + json.dumps(response))
+        print('Register signal sent. Response: ' + json.dumps(response))
         return response
 
 
@@ -311,7 +310,7 @@ class LineBot():
         url = 'https://www.worksapis.com/v1.0/bots'
         print('Register url is: ' + url)
         headers = {
-            'Authorization': 'Bearer {token}'.format(self.access_token),
+            'Authorization': 'Bearer {token}'.format(token = self.access_token),
             'Content-Type': 'application/json',
         }
         if(enable_callback):
@@ -332,6 +331,6 @@ class LineBot():
                 "administrators": administrators,
             }
         response = requests.post(url=url, data=data, headers = headers).json()
-        print('Bot Register signal sent. Response: \n' + json.dumps(response))
+        print('Bot Register signal sent. Response: ' + json.dumps(response))
         mongo_insert_document(response)
         return json.dumps(response)

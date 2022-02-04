@@ -20,7 +20,7 @@ old_bot_id = '1416866'
 @app.route('/line_works/test_page')
 def line_works_test_page():
     user_auth_url = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).user_auth_url
-    return render_template('test_page.html', user_auth_url = user_auth_url, send_to_one_user_url = url_for('line_works_send_to_one_user'), register_one_bot_url = url_for('line_works_register_one_bot'))
+    return render_template('test_page.html', user_auth_url = user_auth_url)
 
 
 # Redirect_URL for User Account Auth (OAuth)

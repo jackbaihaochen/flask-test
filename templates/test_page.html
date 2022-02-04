@@ -33,19 +33,19 @@
         $(function(){
             // send msg
             $("#submit_send_msg").click(function(){
-                url = "{{ send_to_one_user_url }}"
+                url = "{{ url_for('line_works_send_to_one_user') }}"
                 data = {
                     user_id: $("#user_id").val(),
                     msg: $("#msg").val()
                 }
                 $.post(url, data, function(response){
-                    $("#response").html(`<h1>${response}</h1>`);
+                    $("#response").html(`<p>${response}</p>`);
                 })
             });
 
             // register bot
             $("#submit_register_bot").click(function(){
-                url = "{{ register_one_bot_url }}"
+                url = "{{ url_for('line_works_register_one_bot') }}"
                 data = {
                     bot_name: $("#bot_name").val()
                 }
