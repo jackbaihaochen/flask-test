@@ -66,6 +66,10 @@ def line_works_callback_url():
     # content = request.form['content']
     # LineBot.callback_handler(user_id, channel_id, content)
     content = request.json
+    if(content is None):
+        content = request.form.get('type')
+    if(content is None):
+        content = 'Nothing'
     LineBot.callback_handler(content)
 
 
