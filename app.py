@@ -62,7 +62,7 @@ def line_works_register_one_bot():
 # Callback Handler for LINE WORKS
 @app.route('/line_works/callback_url', methods = ['POST'])
 def line_works_callback_url():
-    response = json.load(request.json)
+    response = request.json
     if(response is None):
         response = 'Nothing'
     user_id = response['source']['userId']
