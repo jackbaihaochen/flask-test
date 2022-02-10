@@ -318,10 +318,9 @@ class LineBot():
         }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers=headers)
-        response = response.status_code
         self.logger.info('Message sent. Response: ' + str(response))
         self.logger.debug('End')
-        return response
+        return str(response)
 
     # Send Text Message to one user
     def send_text_message_to_one(self, user_id, text_msg):
