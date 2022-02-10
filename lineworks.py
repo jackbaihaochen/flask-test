@@ -337,5 +337,5 @@ class LineBot():
         return json.dumps(response)
     
     # callback handler
-    def callback_handler(self, content):
+    def callback_handler(content):
         print(content)
