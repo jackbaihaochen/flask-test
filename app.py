@@ -65,7 +65,8 @@ def line_works_callback_url():
     # channel_id = request.form['source']['channelId']
     # content = request.form['content']
     # LineBot.callback_handler(user_id, channel_id, content)
-    LineBot.callback_handler(request.form)
+    content = request.json
+    LineBot.callback_handler(content)
 
 
 
