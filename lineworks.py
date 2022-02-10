@@ -488,7 +488,7 @@ class LineBot():
         user_id = response['source']['userId']
         # channel_id = response['source']['channelId']
         issued_time = response['issuedTime']
-        self.logger.info('Received callback data :' + response)
+        self.logger.info('Received callback data :' + json.dumps(response))
 
         type = response['type']
         if(type == 'message'):
