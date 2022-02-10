@@ -43,7 +43,19 @@ def line_works_send_to_one_user():
     user_id = request.form['user_id']
     msg = request.form['msg']
     if(access_token):
-        result = LineBot(access_token, new_bot_id).send_message_to_one(user_id, msg)
+        result = LineBot(access_token, new_bot_id).send_text_message_to_one(user_id, msg)
+        return 'Succeeded' if result else 'Failed'
+    else:
+        return 'Failed'
+
+# Send Test Button to One certain user
+@app.route('/line_works/send_button_to_one_user', methods = ['POST'])
+def line_works_send_button_to_one_user():
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    user_id = request.form['user_id']
+    content_text = request.form['content_text']
+    if(access_token):
+        result = LineBot(access_token, new_bot_id).send_button_template_message_to_one(user_id, content_text)
         return 'Succeeded' if result else 'Failed'
     else:
         return 'Failed'
@@ -65,11 +77,8 @@ def line_works_callback_url():
     response = request.json
     if(response is None):
         response = 'Nothing'
-    user_id = response['source']['userId']
-    content = response['content']
     access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
-    LineBot(access_token, new_bot_id).callback_handler(user_id, content)
-
+    LineBot(access_token, new_bot_id).callback_handler(response)
     return 'End'
 
 

@@ -6,13 +6,15 @@ from datetime import datetime
 import os
 import requests
 import json
-from mongo import mongo_connection, mongo_insert_document
+from mongo import mongo_collection_connection, mongo_connection, mongo_insert_document
+from logging import getLogger
 
 
 # class for Line Auth V2 referring API 2.0
 class LineAuthV2():
     # Initialization with necessary information
     def __init__(self, client_secret, client_id, service_account, redirect_url, scope = 'bot,bot.read', auth_type = 'OAuth') -> None:
+        self.logger = getLogger(__name__)
         self.client_secret = client_secret
         self.client_id = client_id
         self.service_account = service_account
@@ -24,29 +26,39 @@ class LineAuthV2():
 
     # Get Access Token: Retrieve from DB, otherwise from Post request
     def get_access_token(self, authorization_code = None):
+
+        self.logger.debug('Start')
+
         # if access_token exists and valid in DB
         result = self.get_access_token_from_db()
         if(result['access_token']):
-            print('Access Token retrieved from DB.')
+            self.logger.info('Access Token retrieved from DB.')
+            self.logger.debug('End')
             return result['access_token']
         # if access_token is invalid but refresh_token exists and valid in DB
         elif(result['refresh_token']):
-            print('Access Token retrieved through refresh token.')
+            self.logger.info('Access Token retrieved through refresh token.')
+            self.logger.debug('End')
             return self.get_access_token_through_refresh_token(result['refresh_token'])
         # if no valid data in DB
         else:
             # if the specified auth type is User Account Auth (OAuth)
             if(self.auth_type == 'OAuth'):
-                print('Access Token retrieved by OAuth.')
+                self.logger.info('Access Token retrieved by OAuth.')
+                self.logger.debug('End')
                 return self.get_access_token_by_oauth(authorization_code)
             # if the specified auth type is Service Account Auth (JWT)
             else:
-                print('Access Token retrieved by JWT.')
+                self.logger.info('Access Token retrieved by JWT.')
+                self.logger.debug('End')
                 return self.get_access_token_by_jwt()
 
 
     # Generate JWT for Line Service Account Auth
     def gen_line_service_auth_jwt(self, payload = None, key = 'secret', algorithm = 'RS256', headers={"alg":"RS256","typ":"JWT"}):
+
+        self.logger.debug('Start')
+
         payload = {
             "iss": self.client_id,
             "sub": self.service_account,
@@ -58,12 +70,16 @@ class LineAuthV2():
         key_file.close()
         key = serialization.load_pem_private_key(bytes(key_content, encoding='utf8'), password=None, backend=default_backend())
         encoded = jwt.encode(payload, key, algorithm, headers)
-        print('JWT generated: ' + encoded)
+        self.logger.info('JWT generated: ' + encoded)
+        self.logger.debug('End')
         return encoded
 
 
     # Get Access Token by Service Account Auth (JWT) request.
     def get_access_token_by_jwt(self):
+
+        self.logger.debug('Start')
+
         url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
         headers = {'Content-Type':'application/x-www-form-urlencoded'}
         data = {
@@ -78,11 +94,15 @@ class LineAuthV2():
         access_token = response.get('access_token')
 
         self.update_access_token_info_to_db(response)
+        self.logger.debug('End')
         return access_token
 
     
     # # Get Access Token by User Account Auth (OAuth) request.
     def get_access_token_by_oauth(self, authorization_code):
+
+        self.logger.debug('Start')
+
         if(authorization_code):
             url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
             headers = {
@@ -99,21 +119,24 @@ class LineAuthV2():
             access_token = response.get('access_token')
 
             self.update_access_token_info_to_db(response)
+            self.logger.debug('End')
             return access_token
         else:
+            self.logger.debug('End')
             return False
         
 
 
     # Get Access Token from DB.
     def get_access_token_from_db(self):
+
+        self.logger.debug('Start')
+
         db_access_token = False
         db_refresh_token = False
 
         # Using Non-relational DB
-        client = mongo_connection()
-        db = client[os.getenv('MONGO_DB')]
-        collection = db[os.getenv('MONGO_COLLECTION')]
+        collection = mongo_collection_connection()
         document = collection.find_one({ 'access_token': { '$exists': 'true' }})
         if(document):
             db_access_token = document['access_token']
@@ -122,14 +145,14 @@ class LineAuthV2():
             db_refresh_token_expiration_time = document['refresh_token_expiration_time']
             # check if access token is expired
             if(db_access_token_expiration_time <= datetime.now()):
-                print("Access_token in DB expired")
+                self.logger.info("Access_token in DB expired")
                 db_access_token = False
                 # only if access token is expired, would we check whether refresh token is expired. If access token is not expired, then we can just use access token.
                 if(db_refresh_token_expiration_time <= datetime.now()):
-                    print("Refresh_token in DB expired")
+                    self.logger.info("Refresh_token in DB expired")
                     db_refresh_token = False
         else:
-            print("No data in DB.")
+            self.logger.info("No data in DB")
             db_access_token = False
             db_refresh_token = False
 
@@ -159,11 +182,15 @@ class LineAuthV2():
         #         db_access_token = False
         #         db_refresh_token = False
 
+        self.logger.debug('End')
         return {'access_token': db_access_token, 'refresh_token': db_refresh_token}
     
 
     # Get Access Token through Refresh Token
     def get_access_token_through_refresh_token(self, refresh_token):
+
+        self.logger.debug('Start')
+
         # Get access token
         url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
         headers = {
@@ -181,11 +208,15 @@ class LineAuthV2():
 
         # Update DB
         self.update_access_token_info_to_db(response)
+        self.logger.debug('End')
         return access_token
 
 
     # Insert Access Token Info into DB
     def update_access_token_info_to_db(self, response):
+
+        self.logger.debug('Start')
+
         # Get data from response
         access_token = response.get('access_token')
         refresh_token = response.get('refresh_token')
@@ -194,9 +225,7 @@ class LineAuthV2():
         print('Access token response: \n' + json.dumps(response))
 
         # Using Non-relational DB
-        client = mongo_connection()
-        db = client[os.getenv('MONGO_DB')]
-        collection = db[os.getenv('MONGO_COLLECTION')]
+        collection = mongo_collection_connection()
         myquery = { 'access_token': { '$exists': 'true' } }
         newvalues = { 'access_token': access_token, 'access_token_expiration_time': access_token_expiration_time}
         # If there is a refresh token, then save it. If the access token is retrieved through refresh token, then the response will not contain refresh token.
@@ -240,17 +269,22 @@ class LineAuthV2():
         #         }
         #     )
         # print('Access Token saved to DB.')
+        self.logger.debug('End')
         return access_token
 
 # class for Line Bot
 class LineBot():
     # constructor: require access_token, bot_id
     def __init__(self, access_token, bot_id):
+        self.logger = getLogger(__name__)
         self.access_token = str(access_token)
         self.bot_id = str(bot_id)
 
     # Get Member List for a certain Domain
     def get_domain_member_list(self, domain_id, cursor=None, count=None):
+
+        self.logger.debug('Start')
+
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/domains/' + str(domain_id) + '/members'
         headers = {
             'Authorization': 'Bearer ' + self.access_token,
@@ -262,38 +296,147 @@ class LineBot():
         if(count):
             params['count'] = count
         response = requests.get(url=url, params=params, headers=headers).json()
-        print('Domain Member List Response: ' + json.dumps(response))
+        self.logger.info('Domain Member List Response: ' + json.dumps(response))
         members = response.get('members')
         next_cursor = None
         response_metadata = response.get('responseMetaData')
         if(response_metadata):
             next_cursor = response_metadata.get('nextCursor')
+        self.logger.debug('End')
         return {'member_list': members, 'next_cursor': next_cursor}
 
     # Send Message to one user
-    def send_message_to_one(self, user_id, message):
+    def send_message_to_one(self, user_id, data: dict):
+
+        self.logger.debug('Start')
+
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/users/' + user_id + '/messages'
-        print('Send Message url is: ' + url)
+        self.logger.info('Send Message url is: ' + url)
         headers = {
             'Authorization': 'Bearer ' + self.access_token,
             'Content-Type': 'application/json',
         }
-        data = {
-            'content': {
-                'type': "text",
-                'text': message,
-            },
-        }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers=headers)
         response = response.status_code
-        print('Message sent. Response: ' + 'Succeeded' if response == 201 else 'Failed')
+        self.logger.info('Message sent. Response: ' + 'Succeeded' if response == 201 else 'Failed')
+        self.logger.debug('End')
         return response == 201
 
+    # Send Text Message to one user
+    def send_text_message_to_one(self, user_id, text_msg):
+        self.logger.debug('Start')
+        data = {
+            "content": {
+                "type": "text",
+                "text": text_msg
+            }
+        }
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+
+    # Send Image Message to one user
+    def send_image_message_to_one(self, user_id, image_url = None, resource_id = None, source = 'url'):
+        self.logger.debug('Start')
+        if(source == 'url'):
+            data = {
+                "content": {
+                    "type": "image",
+                    "originalContentUrl": image_url
+                }
+            }
+        elif(source == 'id'):
+            data = {
+                "content": {
+                    "type": "image",
+                    "fileId": resource_id
+                }
+            }
+        else:
+            self.logger.warning('Image resource unknown.')
+            self.logger.debug('End')
+            return False
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+    
+    # Send Link Message to one user
+    def send_link_message_to_one(self, user_id, content_text, link_text, link):
+        self.logger.debug('Start')
+        data = {
+            "content": {
+                "type": "link",
+                "contentText": content_text,
+                "linkText": link_text,
+                "link": link
+            }
+        }
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+    
+    # Send Link Message to one user
+    def send_link_message_to_one(self, user_id, content_text, link_text, link):
+        self.logger.debug('Start')
+        data = {
+            "content": {
+                "type": "link",
+                "contentText": content_text,
+                "linkText": link_text,
+                "link": link
+            }
+        }
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+
+    # Send Stamp Message to one user
+    def send_stamp_message_to_one(self, user_id, package_id, sticker_id):
+        self.logger.debug('Start')
+        data = {
+            "content": {
+                "type": "stamp",
+                "packageId": package_id,
+                "stickerId": sticker_id,
+            }
+        }
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+    
+    # Send Button Template Message to one user
+    def send_button_template_message_to_one(self, user_id, content_text):
+        self.logger.debug('Start')
+        data = {
+            "content": {
+                "type": "button_template",
+                "contentText": content_text,
+                "actions": [
+                    {
+                        "type": "postback",
+                        "label": "label1",
+                        "data": "choice1",
+                        "displayText": "displayText1",
+                    },
+                    {
+                        "type": "postback",
+                        "label": "label2",
+                        "data": "choice2",
+                        "displayText": "displayText2",
+                    },
+                ]
+            }
+        }
+        response = self.send_message_to_one(user_id, data)
+        self.logger.debug('End')
+        return response
+    
     # Register the bot to one user
     def register_one_user(self, domain_id, user_id):
+        self.logger.debug('Start')
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/domains/' + str(domain_id) + '/members'
-        print('Register url is: ' + url)
+        self.logger.info('Register url is: ' + url)
         headers = {
             'Authorization': 'Bearer ' + self.access_token,
         }
@@ -301,14 +444,16 @@ class LineBot():
             'userId': user_id
         }
         response = requests.post(url=url, data=data, headers=headers).json()
-        print('Register signal sent. Response: ' + json.dumps(response))
+        self.logger.info('Register signal sent. Response: ' + json.dumps(response))
+        self.logger.debug('End')
         return response
 
 
     # register the bot
     def register_bot(self, bot_name, photo_url = 'https://developers.worksmobile.com/favicon.png', description = "WorksMobile's A.I. conversation enabled bot", administrators = ['bai.jack@jackbai'], enable_callback = True, callback_url = 'https://flask-test-bai.herokuapp.com/line_works/callback_url', callback_events = ['text', 'file', 'image', 'sticker', 'location']):
+        self.logger.debug('Start')
         url = 'https://www.worksapis.com/v1.0/bots'
-        print('Register url is: ' + url)
+        self.logger.info('Register url is: ' + url)
         headers = {
             'Authorization': 'Bearer {token}'.format(token = self.access_token),
             'Content-Type': 'application/json',
@@ -332,13 +477,36 @@ class LineBot():
             }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers = headers).json()
-        print('Bot Register signal sent. Response: ' + json.dumps(response))
+        self.logger.info('Bot Register signal sent. Response: ' + json.dumps(response))
         mongo_insert_document(json.load(response))
+        self.logger.debug('End')
         return json.dumps(response)
     
     # callback handler
-    def callback_handler(self, user_id, content):
-        print(user_id)
-        print(content)
-        message = content['text']
-        self.send_message_to_one(user_id, message)
+    def callback_handler(self, response):
+        self.logger.debug('Start')
+        user_id = response['source']['userId']
+        channel_id = response['source']['channelId']
+        issued_time = response['issuedTime']
+        self.logger.info('Received callback data :' + response)
+
+        type = response['type']
+        if(type == 'message'):
+            content_type = response['content']['type']
+            self.logger.debug('Callback type is message. Auto Repeat.')
+            if(content_type == 'text'):
+                self.send_text_message_to_one(user_id, response['content']['text'])
+            elif(content_type == 'location'):
+                self.send_text_message_to_one(user_id, response['content']['address'])
+            elif(content_type == 'sticker'):
+                self.send_stamp_message_to_one(user_id, response['content']['packageId'], response['content']['stickerId'])
+            elif(content_type == 'image'):
+                self.send_image_message_to_one(user_id, source='id', resource_id=response['content']['resourceId'])
+            else:
+                self.logger.warning('Unaccepted content type.')
+        elif(type == 'postback'):
+            data = response['data']
+            self.logger.info('Callback type is postback. The postback data is: ' + data)
+            self.send_text_message_to_one(user_id, data)
+        
+        self.logger.debug('End')

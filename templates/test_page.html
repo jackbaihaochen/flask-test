@@ -10,13 +10,21 @@
 <body>
     <a href="{{ user_auth_url }}">Click to Auth</a>
 
+    <label for="user_id">User ID</label>
+    <input type="text" name="user_id" id="user_id">
+
     <fieldset>
         <legend>Send Message to One User</legend>
-        <label for="user_id">User ID</label>
-        <input type="text" name="user_id" id="user_id">
         <label for="msg">Message</label>
         <input type="text" name="msg" id="msg">
         <button type="submit" id="submit_send_msg">Submit</button>
+    </fieldset>
+
+    <fieldset>
+        <legend>Send Button Message to One User</legend>
+        <label for="content_text">Content Text</label>
+        <input type="text" name="content_text" id="content_text">
+        <button type="submit" id="submit_send_button_msg">Submit</button>
     </fieldset>
 
     <fieldset>
@@ -37,6 +45,18 @@
                 data = {
                     user_id: $("#user_id").val(),
                     msg: $("#msg").val()
+                }
+                $.post(url, data, function(response){
+                    $("#response").html(`<p>${response}</p>`);
+                })
+            });            
+            
+            // send button msg
+            $("#submit_send_button_msg").click(function(){
+                url = "{{ url_for('line_works_send_button_to_one_user') }}"
+                data = {
+                    user_id: $("#user_id").val(),
+                    content_text: $("#content_text").val()
                 }
                 $.post(url, data, function(response){
                     $("#response").html(`<p>${response}</p>`);
