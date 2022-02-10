@@ -44,9 +44,9 @@ def line_works_send_to_one_user():
     msg = request.form['msg']
     if(access_token):
         result = LineBot(access_token, new_bot_id).send_text_message_to_one(user_id, msg)
-        return 'Succeeded' if result else 'Failed'
+        return result
     else:
-        return 'Failed'
+        return 'No access token'
 
 # Send Test Button to One certain user
 @app.route('/line_works/send_button_to_one_user', methods = ['POST'])
@@ -56,9 +56,9 @@ def line_works_send_button_to_one_user():
     content_text = request.form['content_text']
     if(access_token):
         result = LineBot(access_token, new_bot_id).send_button_template_message_to_one(user_id, content_text)
-        return 'Succeeded' if result else 'Failed'
+        return result
     else:
-        return 'Failed'
+        return 'No access token'
 
 # Register a bot
 @app.route('/line_works/register_one_bot', methods = ['POST'])
