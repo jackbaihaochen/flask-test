@@ -61,16 +61,17 @@ def line_works_register_one_bot():
 # Callback Handler for LINE WORKS
 @app.route('/line_works/callback_url', methods = ['POST'])
 def line_works_callback_url():
-    # user_id = request.form['source']['userId']
-    # channel_id = request.form['source']['channelId']
-    # content = request.form['content']
-    # LineBot.callback_handler(user_id, channel_id, content)
-    content = request.json
-    if(content is None):
-        content = request.form.get('type')
-    if(content is None):
-        content = 'Nothing'
-    LineBot.callback_handler(content)
+    user_id = request.form['source']['userId']
+    channel_id = request.form['source']['channelId']
+    content = request.form['content']
+    LineBot.callback_handler(user_id, channel_id, content)
+    # content = request.json
+    # if(content is None):
+    #     content = request.form.get('type')
+    # if(content is None):
+    #     content = 'Nothing'
+    # LineBot.callback_handler(content)
+    return 'End'
 
 
 
