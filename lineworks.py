@@ -478,7 +478,7 @@ class LineBot():
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers = headers).json()
         self.logger.info('Bot Register signal sent. Response: ' + json.dumps(response))
-        mongo_insert_document(json.load(response))
+        mongo_insert_document(json.dumps(response))
         self.logger.debug('End')
         return json.dumps(response)
     
@@ -486,7 +486,7 @@ class LineBot():
     def callback_handler(self, response):
         self.logger.debug('Start')
         user_id = response['source']['userId']
-        channel_id = response['source']['channelId']
+        # channel_id = response['source']['channelId']
         issued_time = response['issuedTime']
         self.logger.info('Received callback data :' + response)
 
