@@ -2,7 +2,7 @@ from flask import Flask, redirect
 from flask import render_template
 from flask import url_for
 from flask import request
-from mongo import mongo_connection
+from mongo import mongo_collection_connection, mongo_connection
 from lineworks import LineAuthV2
 from lineworks import LineBot
 
@@ -58,6 +58,14 @@ def line_works_register_one_bot():
     else:
         return 'Failed'
 
+# Callback Handler for LINE WORKS
+@app.route('/line_works/callback_url', methods = ['POST'])
+def line_works_callback_url():
+    user_id = request.form['source']['userId']
+    channel_id = request.form['source']['channelId']
+    content = request.form['content']
+    LineBot.callback_handler(user_id, channel_id, content)
+
 
 
 
@@ -88,9 +96,7 @@ def search_name():
             raise KeyError
     except KeyError:
         return redirect(url_for('show_search', msg = 'Please enter name.'))
-    client = mongo_connection()
-    db = client['test-db']
-    collection = db['test-collection']
+    collection = mongo_collection_connection()
     document = collection.find_one({'name':name})
     if(document):
         try:
@@ -109,15 +115,18 @@ def insert_name():
         age = request.form['age']
     except KeyError:
         return redirect(url_for('show_insert', msg = 'Enter Error.'))
-    client = mongo_connection()
-    db = client['test-db']
-    collection = db['test-collection']
+    collection = mongo_collection_connection()
+    query = {
+        'name': name
+    }
     data = {
         'name': name,
         'age': age,
     }
-    document = collection.insert_one(data)
-    return redirect(url_for('show_search', name = name, age = age))
+    already_exist = collection.find_one_and_update(query, {'$set': data})
+    if(not already_exist):
+        document = collection.insert_one(data)
+    return redirect(url_for('search_name', name = name))
 
 if __name__ == '__main__':
     app.run()

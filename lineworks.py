@@ -333,5 +333,10 @@ class LineBot():
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers = headers).json()
         print('Bot Register signal sent. Response: ' + json.dumps(response))
-        mongo_insert_document(response)
+        mongo_insert_document(json.load(response))
         return json.dumps(response)
+    
+    # callback handler
+    def callback_handler(self, user_id, channel_id, content):
+        print(user_id, channel_id)
+        print(content)
