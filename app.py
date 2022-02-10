@@ -5,6 +5,7 @@ from flask import request
 from mongo import mongo_collection_connection, mongo_connection
 from lineworks import LineAuthV2
 from lineworks import LineBot
+import json
 
 app = Flask(__name__)
 
@@ -61,16 +62,14 @@ def line_works_register_one_bot():
 # Callback Handler for LINE WORKS
 @app.route('/line_works/callback_url', methods = ['POST'])
 def line_works_callback_url():
-    user_id = request.form['source']['userId']
-    channel_id = request.form['source']['channelId']
-    content = request.form['content']
-    LineBot.callback_handler(user_id, channel_id, content)
-    # content = request.json
-    # if(content is None):
-    #     content = request.form.get('type')
-    # if(content is None):
-    #     content = 'Nothing'
-    # LineBot.callback_handler(content)
+    response = json.load(request.json)
+    if(response is None):
+        response = 'Nothing'
+    user_id = response['source']['userId']
+    content = response['content']
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
+    LineBot(access_token, new_bot_id).callback_handler(user_id, content)
+
     return 'End'
 
 

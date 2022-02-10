@@ -337,6 +337,8 @@ class LineBot():
         return json.dumps(response)
     
     # callback handler
-    def callback_handler(user_id, channel_id, content):
-        print(user_id, channel_id)
+    def callback_handler(self, user_id, content):
+        print(user_id)
         print(content)
+        message = content['text']
+        self.send_message_to_one(user_id, message)
