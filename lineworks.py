@@ -32,24 +32,24 @@ class LineAuthV2():
         # if access_token exists and valid in DB
         result = self.get_access_token_from_db()
         if(result['access_token']):
-            self.logger.info('Access Token retrieved from DB.')
+            print('Access Token retrieved from DB.')
             self.logger.debug('End')
             return result['access_token']
         # if access_token is invalid but refresh_token exists and valid in DB
         elif(result['refresh_token']):
-            self.logger.info('Access Token retrieved through refresh token.')
+            print('Access Token retrieved through refresh token.')
             self.logger.debug('End')
             return self.get_access_token_through_refresh_token(result['refresh_token'])
         # if no valid data in DB
         else:
             # if the specified auth type is User Account Auth (OAuth)
             if(self.auth_type == 'OAuth'):
-                self.logger.info('Access Token retrieved by OAuth.')
+                print('Access Token retrieved by OAuth.')
                 self.logger.debug('End')
                 return self.get_access_token_by_oauth(authorization_code)
             # if the specified auth type is Service Account Auth (JWT)
             else:
-                self.logger.info('Access Token retrieved by JWT.')
+                print('Access Token retrieved by JWT.')
                 self.logger.debug('End')
                 return self.get_access_token_by_jwt()
 
@@ -70,7 +70,7 @@ class LineAuthV2():
         key_file.close()
         key = serialization.load_pem_private_key(bytes(key_content, encoding='utf8'), password=None, backend=default_backend())
         encoded = jwt.encode(payload, key, algorithm, headers)
-        self.logger.info('JWT generated: ' + encoded)
+        print('JWT generated: ' + encoded)
         self.logger.debug('End')
         return encoded
 
@@ -145,14 +145,14 @@ class LineAuthV2():
             db_refresh_token_expiration_time = document['refresh_token_expiration_time']
             # check if access token is expired
             if(db_access_token_expiration_time <= datetime.now()):
-                self.logger.info("Access_token in DB expired")
+                print("Access_token in DB expired")
                 db_access_token = False
                 # only if access token is expired, would we check whether refresh token is expired. If access token is not expired, then we can just use access token.
                 if(db_refresh_token_expiration_time <= datetime.now()):
-                    self.logger.info("Refresh_token in DB expired")
+                    print("Refresh_token in DB expired")
                     db_refresh_token = False
         else:
-            self.logger.info("No data in DB")
+            print("No data in DB")
             db_access_token = False
             db_refresh_token = False
 
@@ -296,7 +296,7 @@ class LineBot():
         if(count):
             params['count'] = count
         response = requests.get(url=url, params=params, headers=headers).json()
-        self.logger.info('Domain Member List Response: ' + json.dumps(response))
+        print('Domain Member List Response: ' + json.dumps(response))
         members = response.get('members')
         next_cursor = None
         response_metadata = response.get('responseMetaData')
@@ -311,14 +311,15 @@ class LineBot():
         self.logger.debug('Start')
 
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/users/' + user_id + '/messages'
-        self.logger.info('Send Message url is: ' + url)
+        print('Send Message url is: ' + url)
         headers = {
             'Authorization': 'Bearer ' + self.access_token,
             'Content-Type': 'application/json',
         }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers=headers)
-        self.logger.info('Message sent. Response: ' + str(response))
+        response = response.content
+        print('Message sent. Response: ' + str(response))
         self.logger.debug('End')
         return str(response)
 
@@ -404,27 +405,39 @@ class LineBot():
         self.logger.debug('End')
         return response
     
-    # Send Button Template Message to one user
-    def send_button_template_message_to_one(self, user_id, content_text):
+    # Send Quick Reply Message to one user
+    def send_quick_reply_message_to_one(self, user_id, content_text):
         self.logger.debug('Start')
         data = {
             "content": {
-                "type": "button_template",
-                "contentText": content_text,
-                "actions": [
-                    {
-                        "type": "postback",
-                        "label": "label1",
-                        "data": "choice1",
-                        "displayText": "displayText1",
-                    },
-                    {
-                        "type": "postback",
-                        "label": "label2",
-                        "data": "choice2",
-                        "displayText": "displayText2",
-                    },
-                ]
+                "type": "text",
+                "text": content_text,
+                "quickReply": {
+                    "items": [
+                        {
+                        "imageUrl": "https://www.example.com/a.png",
+                        "action": {
+                            "type": "message",
+                            "label": "Sushi",
+                            "text": "Sushi"
+                        }
+                        },
+                        {
+                        "imageUrl": "https://www.example.com/b.png",
+                        "action": {
+                            "type": "message",
+                            "label": "Italian",
+                            "text": "Italian"
+                        }
+                        },
+                        {
+                        "action": {
+                            "type": "camera",
+                            "label": "Open Camera"
+                        }
+                        }
+                    ]
+                }
             }
         }
         response = self.send_message_to_one(user_id, data)
@@ -435,7 +448,7 @@ class LineBot():
     def register_one_user(self, domain_id, user_id):
         self.logger.debug('Start')
         url = 'https://www.worksapis.com/v1.0/bots/' + self.bot_id + '/domains/' + str(domain_id) + '/members'
-        self.logger.info('Register url is: ' + url)
+        print('Register url is: ' + url)
         headers = {
             'Authorization': 'Bearer ' + self.access_token,
         }
@@ -443,7 +456,7 @@ class LineBot():
             'userId': user_id
         }
         response = requests.post(url=url, data=data, headers=headers).json()
-        self.logger.info('Register signal sent. Response: ' + json.dumps(response))
+        print('Register signal sent. Response: ' + json.dumps(response))
         self.logger.debug('End')
         return response
 
@@ -452,7 +465,7 @@ class LineBot():
     def register_bot(self, bot_name, photo_url = 'https://developers.worksmobile.com/favicon.png', description = "WorksMobile's A.I. conversation enabled bot", administrators = ['bai.jack@jackbai'], enable_callback = True, callback_url = 'https://flask-test-bai.herokuapp.com/line_works/callback_url', callback_events = ['text', 'file', 'image', 'sticker', 'location']):
         self.logger.debug('Start')
         url = 'https://www.worksapis.com/v1.0/bots'
-        self.logger.info('Register url is: ' + url)
+        print('Register url is: ' + url)
         headers = {
             'Authorization': 'Bearer {token}'.format(token = self.access_token),
             'Content-Type': 'application/json',
@@ -476,7 +489,7 @@ class LineBot():
             }
         data = json.dumps(data)
         response = requests.post(url=url, data=data, headers = headers).json()
-        self.logger.info('Bot Register signal sent. Response: ' + json.dumps(response))
+        print('Bot Register signal sent. Response: ' + json.dumps(response))
         mongo_insert_document(json.dumps(response))
         self.logger.debug('End')
         return json.dumps(response)
@@ -487,7 +500,7 @@ class LineBot():
         user_id = response['source']['userId']
         # channel_id = response['source']['channelId']
         issued_time = response['issuedTime']
-        self.logger.info('Received callback data :' + json.dumps(response))
+        print('Received callback data :' + json.dumps(response))
 
         type = response['type']
         if(type == 'message'):
@@ -505,7 +518,7 @@ class LineBot():
                 self.logger.warning('Unaccepted content type.')
         elif(type == 'postback'):
             data = response['data']
-            self.logger.info('Callback type is postback. The postback data is: ' + data)
+            print('Callback type is postback. The postback data is: ' + data)
             self.send_text_message_to_one(user_id, data)
         
         self.logger.debug('End')

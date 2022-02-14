@@ -21,10 +21,10 @@
     </fieldset>
 
     <fieldset>
-        <legend>Send Button Message to One User</legend>
+        <legend>Send Quick Reply Message to One User</legend>
         <label for="content_text">Content Text</label>
         <input type="text" name="content_text" id="content_text">
-        <button type="submit" id="submit_send_button_msg">Submit</button>
+        <button type="submit" id="submit_send_quick_reply_msg">Submit</button>
     </fieldset>
 
     <fieldset>
@@ -51,9 +51,9 @@
                 })
             });            
             
-            // send button msg
-            $("#submit_send_button_msg").click(function(){
-                url = "{{ url_for('line_works_send_button_to_one_user') }}"
+            // send quick reply msg
+            $("#submit_send_quick_reply_msg").click(function(){
+                url = "{{ url_for('line_works_send_quick_reply_to_one_user') }}"
                 data = {
                     user_id: $("#user_id").val(),
                     content_text: $("#content_text").val()

@@ -48,14 +48,14 @@ def line_works_send_to_one_user():
     else:
         return 'No access token'
 
-# Send Test Button to One certain user
-@app.route('/line_works/send_button_to_one_user', methods = ['POST'])
-def line_works_send_button_to_one_user():
+# Send Test Quick Reply to One certain user
+@app.route('/line_works/send_quick_reply_to_one_user', methods = ['POST'])
+def line_works_send_quick_reply_to_one_user():
     access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
     user_id = request.form['user_id']
     content_text = request.form['content_text']
     if(access_token):
-        result = LineBot(access_token, new_bot_id).send_button_template_message_to_one(user_id, content_text)
+        result = LineBot(access_token, new_bot_id).send_quick_reply_message_to_one(user_id, content_text)
         return result
     else:
         return 'No access token'
