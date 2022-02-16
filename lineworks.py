@@ -13,7 +13,7 @@ from logging import getLogger
 # class for Line Auth V2 referring API 2.0
 class LineAuthV2():
     # Initialization with necessary information
-    def __init__(self, client_secret, client_id, service_account, redirect_url, scope = 'bot,bot.read', auth_type = 'OAuth') -> None:
+    def __init__(self, client_secret, client_id, service_account, redirect_url, scope = 'bot,bot.read,user.read', auth_type = 'OAuth') -> None:
         self.logger = getLogger(__name__)
         self.client_secret = client_secret
         self.client_id = client_id

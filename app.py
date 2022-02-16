@@ -5,15 +5,17 @@ from flask import request
 from mongo import mongo_collection_connection, mongo_connection
 from lineworks import LineAuthV2
 from lineworks import LineBot
+from dotenv import load_dotenv as env
 import json
 
 app = Flask(__name__)
 
 # For Line Works Bot
-client_secret = 'dFVoTijl9l'
-client_id = 'AVd_gv8Ruji_80dWUNRt'
-service_account = '6xr6v.serviceaccount@jackbai'
-redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
+client_secret = 'O98Qf5Ic6O'
+client_id = 'vd2Lb0QQvZ2ctU4qof7s'
+service_account = 'nr2ca.serviceaccount@testcoltd-53'
+# redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
+redirect_url = 'http://127.0.0.1:5000/api/redirect'
 new_bot_id = '1416858'
 old_bot_id = '1416866'
 
@@ -25,16 +27,18 @@ def line_works_test_page():
 
 
 # Redirect_URL for User Account Auth (OAuth)
-@app.route('/line_works/redirect_url', methods = ['GET'])
+# @app.route('/line_works/redirect_url', methods = ['GET'])
+@app.route('/api/redirect', methods = ['GET'])
 def line_works_redirect_url():
     authorization_code = request.args.get('code')
-    state = request.args.get('state')
-    if(state == 'aBcDeF'):
-        msg = 'State Matched'
-    else:
-        msg = "Stata didn't Match"
+    # authorization_code = 'jp1WEVXVmJhYUQ1MXRLeUQ5ZA=='
+    # state = request.args.get('state')
+    # if(state == 'aBcDeF'):
+    #     msg = 'State Matched'
+    # else:
+    #     msg = "Stata didn't Match"
     access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token(authorization_code = authorization_code)
-    return render_template('redirect_url.html', msg = msg, state = state, authorization_code = authorization_code, access_token = access_token)
+    return render_template('redirect_url.html', authorization_code = authorization_code, access_token = access_token)
 
 # Send Message to One certain user
 @app.route('/line_works/send_to_one_user', methods = ['POST'])
