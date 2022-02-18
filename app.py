@@ -16,7 +16,7 @@ client_id = 'vd2Lb0QQvZ2ctU4qof7s'
 service_account = 'nr2ca.serviceaccount@testcoltd-53'
 # redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
 redirect_url = 'http://127.0.0.1:5000/api/redirect'
-new_bot_id = '3172234'
+new_bot_id = '3264393'
 old_bot_id = '1416866'
 
 # Auth Button Page
