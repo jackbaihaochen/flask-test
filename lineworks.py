@@ -373,7 +373,7 @@ class LineBot():
         return response
 
     # Send Image Message to one user
-    def send_image_message_to_one(self, user_id, image_url = None, resource_id = None, source = 'url'):
+    def send_image_message_to_one(self, user_id, image_url = None, file_id = None, source = 'url'):
         self.logger.debug('Start')
         if(source == 'url'):
             data = {
@@ -386,7 +386,7 @@ class LineBot():
             data = {
                 "content": {
                     "type": "image",
-                    "fileId": resource_id
+                    "fileId": file_id
                 }
             }
         else:
@@ -554,7 +554,7 @@ class LineBot():
             elif(content_type == 'sticker'):
                 self.send_stamp_message_to_one(user_id, response['content']['packageId'], response['content']['stickerId'])
             elif(content_type == 'image'):
-                self.send_image_message_to_one(user_id, source='id', resource_id=response['content']['resourceId'])
+                self.send_image_message_to_one(user_id, source='id', file_id=response['content']['fileId'])
             else:
                 self.logger.warning('Unaccepted content type.')
         elif(type == 'postback'):
