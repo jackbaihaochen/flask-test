@@ -11,11 +11,13 @@
     {% else %}
     <h1>Hello, World!</h1>
     {% endif %}
+    {% if search_url %}
     <form action="{{ search_url }}" method="get">
         <label for="name">Name</label>
         <input type="text" name="name" id="name">
         <input type="submit" value="search">
     </form>
+    {% endif %}
     <a href="{{ show_insert_url }}">Insert Click Here</a>
     {% if msg %}
     <h1>{{ msg }}</h1>

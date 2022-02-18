@@ -12,6 +12,8 @@
 
     <label for="user_id">User ID</label>
     <input type="text" name="user_id" id="user_id">
+    <label for="private_key">Private Key</label>
+    <input type="textarea" name="private_key" id="private_key">
 
     <fieldset>
         <legend>Send Message to One User</legend>
@@ -44,7 +46,8 @@
                 url = "{{ url_for('line_works_send_to_one_user') }}"
                 data = {
                     user_id: $("#user_id").val(),
-                    msg: $("#msg").val()
+                    msg: $("#msg").val(),
+                    private_key: $("#private_key").val()
                 }
                 $.post(url, data, function(response){
                     $("#response").html(`<p>${response}</p>`);

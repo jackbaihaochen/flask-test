@@ -13,7 +13,7 @@ from logging import getLogger
 # class for Line Auth V2 referring API 2.0
 class LineAuthV2():
     # Initialization with necessary information
-    def __init__(self, client_secret, client_id, service_account, redirect_url, scope = 'bot,bot.read,user.read', auth_type = 'OAuth') -> None:
+    def __init__(self, client_secret, client_id, service_account, redirect_url = None, scope = 'bot,bot.read,user.read', auth_type = None) -> None:
         self.logger = getLogger(__name__)
         self.client_secret = client_secret
         self.client_id = client_id
@@ -25,23 +25,11 @@ class LineAuthV2():
 
 
     # Get Access Token: Retrieve from DB, otherwise from Post request
-    def get_access_token(self, authorization_code = None):
+    def get_access_token(self, authorization_code = None, private_key = None):
 
         self.logger.debug('Start')
 
-        # if access_token exists and valid in DB
-        result = self.get_access_token_from_db()
-        if(result['access_token']):
-            print('Access Token retrieved from DB.')
-            self.logger.debug('End')
-            return result['access_token']
-        # if access_token is invalid but refresh_token exists and valid in DB
-        elif(result['refresh_token']):
-            print('Access Token retrieved through refresh token.')
-            self.logger.debug('End')
-            return self.get_access_token_through_refresh_token(result['refresh_token'])
-        # if no valid data in DB
-        else:
+        if(self.auth_type):
             # if the specified auth type is User Account Auth (OAuth)
             if(self.auth_type == 'OAuth'):
                 print('Access Token retrieved by OAuth.')
@@ -51,11 +39,29 @@ class LineAuthV2():
             else:
                 print('Access Token retrieved by JWT.')
                 self.logger.debug('End')
+                return self.get_access_token_by_jwt(private_key)
+        else:
+            # if access_token exists and valid in DB
+            result = self.get_access_token_from_db()
+            if(result['access_token']):
+                print('Access Token retrieved from DB.')
+                self.logger.debug('End')
+                return result['access_token']
+            # if access_token is invalid but refresh_token exists and valid in DB
+            elif(result['refresh_token']):
+                print('Access Token retrieved through refresh token.')
+                self.logger.debug('End')
+                return self.get_access_token_through_refresh_token(result['refresh_token'])
+            # if the specified auth type is Service Account Auth (JWT)
+            else:
+                print('Access Token retrieved by JWT.')
+                self.logger.debug('End')
                 return self.get_access_token_by_jwt()
+  
 
 
     # Generate JWT for Line Service Account Auth
-    def gen_line_service_auth_jwt(self, payload = None, key = 'secret', algorithm = 'RS256', headers={"alg":"RS256","typ":"JWT"}):
+    def gen_line_service_auth_jwt(self, payload = None, private_key = 'secret', algorithm = 'RS256', headers={"alg":"RS256","typ":"JWT"}):
 
         self.logger.debug('Start')
 
@@ -65,31 +71,61 @@ class LineAuthV2():
             "iat": int(time.time()),
             "exp": int(time.time() + 60*60),
         }
-        key_file = open(os.path.join(BASE_DIR, 'private_20220126175641.key') ,'r')
-        key_content = key_file.read()
-        key_file.close()
-        key = serialization.load_pem_private_key(bytes(key_content, encoding='utf8'), password=None, backend=default_backend())
-        encoded = jwt.encode(payload, key, algorithm, headers)
+        test_private_key = """-----BEGIN PRIVATE KEY-----
+        MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCiKs4L5Kaht6Pe
+        lToeJ+AyOwrTwi+ELJ6HhLAcXXBegYLuU7dp48g50NXAX6N0PGnjzQ1jmqBskLYJ
+        76AfmIh/mnJI5oTucpKAiLCOS0ouU7hpm3QvftavgBwl5avIf8qLAaFxCDOAA/Gc
+        SeHcKflgrk8RGWO9Vq1AReVrRjF02YpvWjRNXtXy+GTJQl/h5woXW1ZDSFa2697b
+        UCBlCj3GKZsyhF7yXGSAdGWOSE2PKX7XT2e9DD166lYLnsuYeK5AP4qqFSW2DzoS
+        pjFidmTbXnTLpeUvAjTXK2HU2OsFShlHtEIZjz5yCg24Gow1Tm7IR2+W6yaxJacR
+        ueOoRezbAgMBAAECggEBAIK7YUpDNXYPlmKdCLJA0UONR4g49pdmZRK5DESBq1H0
+        tHmvMaCCyeqaCYfBUgMlpPPJXa7be9Kpwqc1728pR3kfKFzOwYF9Cc/m4faEibPZ
+        OESi1sJnTWlELOz8P0UuiDkRwnVd+C6Of1vQT+1uRSUEwKb3Qenkk1zKPE4D02Dv
+        qECMJlPxtJCjUdxcPlSrtxNdPcS7wO8/HbDS7fQSegt7+4zMa1I0qDG+5zTwcHcC
+        HsUwhYVAguy6Pa9xn0YAoKQ6XYLFLhaQLp5rX4bcdIcbZgv4TLY+L7EuxHOCRTBj
+        IwE+oDPM3Pj5DXTJMyUew7jmEzEbCD2jNfO4oBMH/rkCgYEA5EBEqmjQdByh/g9+
+        PflqUhbgBPAMUxGm/TLQhGvuTOxggvYS8scd0Ot/F/4PcYyVdr1aetyCedSP4Gx/
+        fD26d8E44y2zM3rGCgBm6jAy1OaAn6WaoKLbPBlGXXee3FCXHNBvFI1jDmHUSTkD
+        b3ZTswnrwItcIkw/0dXfuDRPl/8CgYEAteHYeg/uu0rbVEBglEaf3nICXCKuMHiM
+        074J0nhM3+CVZLt9twJBv5JigpaEoDhF07mwze9jqeAsYwkyknEOjCPtMVBwztO7
+        egeHcRbKTshLJTaQuktVxjOuOfVbKIE1sz6OUqC1E+0yVvmyUAYgLgj1s3VfZjEL
+        W6+UDBrDCyUCf0kcTOJIsHyAr2Kxk75GJcgli5wJR+lTvilcHW5NJAd/r2pDZ85b
+        +TDyPcNxnYDBhx6BiHnSJ/jeHTfFiRBCtXembJJYEQ5sRQLvHgflaGLJcmmwodbS
+        U2bssZ0+s6PeLIkOOoZaw1/X9id+G5uYSzcN9nW2LczOn6KW3xIhr10CgYEArXCb
+        PPK6hbGBa1skfeDHDJmNdIzBrIkYScZ7mU+MhySjcXZ1EDI/vk36UGr2N87Rj3AQ
+        kKCKWnDiAuK/bfQPmkWcJx19JU21Bk3ts0K3Ut8fAXKCGpRCTAn2R2CYOAzWx4GM
+        uHB1nHXhPh1IE5Vz1FJI8oOnoEx+d0T8GXrfqV0CgYBViwlBgsLaHLXWjDcH2nNX
+        GER+6M+sVnBZ1hC3aTKts4aw7q3IY0CHUi6zt+PZPbe4tt8AqnBzmMx7OFS2NstF
+        JMkivLz6s4aIvutRyGTWBUPlMmf1X37DMVPwpD/H2x5lUTf7rXI7HFNRPb0ZjolV
+        2t/2ZJJeH+EDBarkMpO2mQ==
+        -----END PRIVATE KEY-----"""
+        # begin = '-----BEGIN PRIVATE KEY-----'
+        # end = '-----END PRIVATE KEY-----'
+        # private_key = begin + private_key[len(begin):-(len(end))].replace(' ','\n') + end
+        test_key = test_private_key.encode("utf-8")
+        # key = private_key.encode("utf-8")
+        encoded = jwt.encode(payload, test_key, algorithm, headers)
         print('JWT generated: ' + encoded)
         self.logger.debug('End')
         return encoded
 
 
     # Get Access Token by Service Account Auth (JWT) request.
-    def get_access_token_by_jwt(self):
+    def get_access_token_by_jwt(self, private_key):
 
         self.logger.debug('Start')
 
         url = 'https://auth.worksmobile.com/oauth2/v2.0/token'
         headers = {'Content-Type':'application/x-www-form-urlencoded'}
         data = {
-            'assertion': self.gen_line_service_auth_jwt(),
+            'assertion': self.gen_line_service_auth_jwt(private_key = private_key),
             'grant_type': 'urn:ietf:params:oauth:grant-type:jwt-bearer',
             'client_id': self.client_id,
             'client_secret': self.client_secret,
             'scope': self.scope,
         }
         response = requests.post(url=url, data=data, headers=headers)
+        print(response.status_code)
         response = response.json()
         access_token = response.get('access_token')
 
@@ -494,6 +530,11 @@ class LineBot():
         self.logger.debug('End')
         return json.dumps(response)
     
+
+    # receiving image from user
+
+
+
     # callback handler
     def callback_handler(self, response):
         self.logger.debug('Start')

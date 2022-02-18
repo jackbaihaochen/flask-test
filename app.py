@@ -16,7 +16,7 @@ client_id = 'vd2Lb0QQvZ2ctU4qof7s'
 service_account = 'nr2ca.serviceaccount@testcoltd-53'
 # redirect_url = 'https://flask-test-bai.herokuapp.com/line_works/redirect_url'
 redirect_url = 'http://127.0.0.1:5000/api/redirect'
-new_bot_id = '1416858'
+new_bot_id = '3172234'
 old_bot_id = '1416866'
 
 # Auth Button Page
@@ -43,9 +43,10 @@ def line_works_redirect_url():
 # Send Message to One certain user
 @app.route('/line_works/send_to_one_user', methods = ['POST'])
 def line_works_send_to_one_user():
-    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url).get_access_token()
     user_id = request.form['user_id']
     msg = request.form['msg']
+    private_key = request.form['private_key']
+    access_token = LineAuthV2(client_secret = client_secret, client_id = client_id, service_account = service_account, redirect_url = redirect_url, auth_type = 'JWT').get_access_token(private_key=private_key)
     if(access_token):
         result = LineBot(access_token, new_bot_id).send_text_message_to_one(user_id, msg)
         return result
@@ -87,7 +88,10 @@ def line_works_callback_url():
 
 
 
-
+@app.route('/jwt', methods = ['GET'])
+def jwt():
+    msg = LineAuthV2(client_secret, client_id, service_account, auth_type = "JWT").gen_line_service_auth_jwt()
+    return render_template('hello.html', msg = msg)
 
 
 
